@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create_user.dto';
 import { UserDto } from './dto/user.dto';
 import { UserEntity } from './entities/users.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -27,13 +28,20 @@ export class UsersService {
     return this._toUserDto(resp);
   }
 
+  async loginUser({username}: UserDto): Promise<UserEntity> {
+    const user = await this.userRepo.findOne({where: {username}});
+    if (!user) throw new BadRequestException('User not found');
+
+    return user;
+  }
+
   async findByUserName(userName: string): Promise<UserDto> {
-    this.userRepo.findOne({
+    const resp = await this.userRepo.findOne({
       where: {
         'username': userName
       }
     });
-    return null;
+    return this._toUserDto(resp);
   }
 
   async _toUserDto(userEntity: UserEntity): Promise<UserDto>{
