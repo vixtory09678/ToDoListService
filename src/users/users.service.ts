@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create_user.dto';
+import { UserDto } from './dto/user.dto';
 import { UserEntity } from './entities/users.entity';
 
 @Injectable()
@@ -9,15 +11,35 @@ export class UsersService {
     @InjectRepository(UserEntity) private readonly userRepo: Repository<UserEntity>
   ){}
 
-  async create(user: UserEntity): Promise<UserEntity> {
-    return this.userRepo.save(user);
+  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
+    const user = this.findByUserName(createUserDto.username);
+    if (user) {
+      throw new BadRequestException('User already exists');
+    }
+
+    const { username, password } = createUserDto
+    const userEntity = await this.userRepo.create({
+      username,
+      password
+    })
+
+    const resp = await this.userRepo.save(userEntity);
+    return this._toUserDto(resp);
   }
 
-  async findByUserName(userName: string): Promise<UserEntity> {
-    return this.userRepo.findOne({
+  async findByUserName(userName: string): Promise<UserDto> {
+    this.userRepo.findOne({
       where: {
         'username': userName
       }
     });
+    return null;
+  }
+
+  async _toUserDto(userEntity: UserEntity): Promise<UserDto>{
+    return {
+      id: userEntity.id,
+      username: userEntity.username
+    }
   }
 }
