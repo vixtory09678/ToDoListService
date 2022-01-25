@@ -5,6 +5,7 @@ import { CreateUserDto } from './dto/create_user.dto';
 import { UserDto } from './dto/user.dto';
 import { UserEntity } from './entities/users.entity';
 import * as bcrypt from 'bcrypt';
+import { LoginUserDto } from './dto/user_login.dto';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +29,7 @@ export class UsersService {
     return this._toUserDto(resp);
   }
 
-  async loginUser({username}: UserDto): Promise<UserEntity> {
+  async loginUser({username}: LoginUserDto): Promise<UserEntity> {
     const user = await this.userRepo.findOne({where: {username}});
     if (!user) throw new BadRequestException('User not found');
 
