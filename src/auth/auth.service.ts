@@ -36,7 +36,7 @@ export class AuthService {
 
   private async createToken(): Promise<CreateToken> {
     return {
-      accessToken: '',
+      accessToken: 'test some token',
       expired: 0,
     }
   }
