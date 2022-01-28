@@ -14,7 +14,8 @@ export class UsersService {
   ){}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
-    const user = this.findByUserName(createUserDto.username);
+    const user = await this.userRepo.findOne({where: { username: createUserDto.username }})
+    console.log(user);
     if (user) {
       throw new BadRequestException('User already exists');
     }
