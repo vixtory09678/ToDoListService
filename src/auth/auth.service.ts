@@ -5,6 +5,7 @@ import { CreateUserDto } from 'src/users/dto/create_user.dto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { LoginUserDto } from 'src/users/dto/user_login.dto';
 import { LoginResponse } from './interfaces/login_response.interface';
+import { CreateToken } from './interfaces/create_token.interface';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const {accessToken, expired} = this.createToken();
+    const {accessToken, expired} = await this.createToken();
     
     return {
       username: user.username,
@@ -33,7 +34,10 @@ export class AuthService {
 
   }
 
-  private createToken(): any {
-
+  private async createToken(): Promise<CreateToken> {
+    return {
+      accessToken: '',
+      expired: 0,
+    }
   }
 }
