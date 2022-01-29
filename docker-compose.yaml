@@ -16,6 +16,10 @@ services:
     environment:
       APP_PORT: 3000
       NODE_ENV: "development"
+
+      JWT_KEY: "this_my_key"
+      JWT_EXPIRES_IN: "1h"
+
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: todo_admin

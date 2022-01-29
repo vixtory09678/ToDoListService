@@ -6,10 +6,14 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { LoginUserDto } from 'src/users/dto/user_login.dto';
 import { LoginResponse } from './interfaces/login_response.interface';
 import { CreateToken } from './interfaces/create_token.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UsersService) {}
+  constructor(
+    private userService: UsersService,
+    private jwtService: JwtService
+  ) {}
 
   async signup(createUserDto: CreateUserDto): Promise<UserDto> {
     const user = await this.userService.createUser(createUserDto);
@@ -17,27 +21,36 @@ export class AuthService {
   }
 
   async login(loginUserDto: LoginUserDto): Promise<LoginResponse> {
-    const user = await this.userService.loginUser(loginUserDto);
+    const user = await this.userService.loginUser(loginUserDto.username);
 
     const isMatch = await bcrypt.compare(loginUserDto.password, user.password);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const {accessToken, expired} = await this.createToken();
-    
-    return {
+    const response: LoginResponse = {
       username: user.username,
-      accessToken,
-      expired
-    };
+      ...await this.createToken(user)
+    }
 
+    return response
   }
 
-  private async createToken(): Promise<CreateToken> {
+  async validateUser(username: string): Promise<UserDto> {
+    const user =  await this.userService.findByUserName(username);
+    if (!user) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    return user;
+  }
+
+  private async createToken({username} : UserDto): Promise<CreateToken> {
+    const expiredIn = process.env.JWT_EXPIRES_IN;
+    const user = { username };
+    const accessToken = this.jwtService.sign(user);
     return {
-      accessToken: 'test some token',
-      expired: 0,
+      accessToken,
+      expiredIn,
     }
   }
 }
