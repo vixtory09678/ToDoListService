@@ -6,6 +6,8 @@ import { CreateTodoDto } from './dto/create_todo.dto';
 import { TodoService } from './todo.service';
 import { diskStorage } from 'multer'
 import { UploadFile } from './interfaces/upload_file.interfaces';
+import { User } from 'src/auth/decorators/user.decorator';
+import { UserEntity } from 'src/users/entities/users.entity';
 
 @Controller('todo')
 export class TodoController {
@@ -30,8 +32,9 @@ export class TodoController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/')
-  async addTodo(@Body() createTodoDto: CreateTodoDto) {
-    
+  async addTodo(@Body() createTodoDto: CreateTodoDto, @User() user: UserEntity) {
+    console.log(user);
+    this.todoService.addTodo(user, createTodoDto);
   }
 
   @UseGuards(JwtAuthGuard)
