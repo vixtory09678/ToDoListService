@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import { IsString, IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateTodoDto {
 
@@ -9,7 +9,9 @@ export class CreateTodoDto {
   @IsString()
   detail: string;
 
+  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   picture_url: string;
 
 }
