@@ -13,6 +13,12 @@ export class TodoEntity {
     type: 'varchar', 
     nullable: false, 
   })
+  name: string
+
+  @Column({
+    type: 'varchar', 
+    nullable: true, 
+  })
   detail: string;
 
   @Column({
