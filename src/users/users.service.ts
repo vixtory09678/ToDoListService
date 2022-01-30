@@ -46,7 +46,7 @@ export class UsersService {
     return this._toUserDto(resp);
   }
 
-  async _toUserDto(userEntity: UserEntity): Promise<UserDto>{
+  private async _toUserDto(userEntity: UserEntity): Promise<UserDto>{
     return {
       id: userEntity.id,
       username: userEntity.username
