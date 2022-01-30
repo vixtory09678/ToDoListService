@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { UserEntity } from 'src/users/entities/users.entity';
 
 @Entity()
@@ -7,7 +7,7 @@ export class TodoEntity {
   id: string;
 
   @ManyToOne(type => UserEntity)
-  userId: string;
+  user: UserEntity;
 
   @Column({
     type: 'varchar', 
@@ -34,4 +34,7 @@ export class TodoEntity {
     default: false
   })
   isDone: Boolean;
+
+  @CreateDateColumn()
+  createdAt?: Date;
 }
