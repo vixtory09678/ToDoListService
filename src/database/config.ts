@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm"
+import { TodoEntity } from "src/todo/entities/todo.entity"
 import { UserEntity } from "src/users/entities/users.entity"
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
@@ -10,7 +11,8 @@ const databaseProviders: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_NAME || 'db_name',
   entities: [
-    UserEntity
+    UserEntity,
+    TodoEntity
   ],
   namingStrategy: new SnakeNamingStrategy(),
   synchronize: process.env.NODE_ENV !== 'prod',
