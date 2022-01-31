@@ -21,7 +21,7 @@ export class TodoService {
     let pictureUrl = ''
     
     if (createTodoDto.pictureName)
-      // use static url; edit later
+      // TODO use static url; edit later
       pictureUrl = 'todo-service/images/' + createTodoDto.pictureName;
 
     const todoEntity:TodoEntity = this.todoRepo.create({
@@ -54,11 +54,10 @@ export class TodoService {
 
   async updateTodo(id: string, updateTodo: UpdateTodoDto): Promise<Todo> {
     let todo: TodoEntity = await this._findTodoById(id);
-    todo = this.todoRepo.create({
-      id,
-      ...updateTodo
-    })
+
+    todo = this.todoRepo.create({ id,...updateTodo })
     await this.todoRepo.update({id}, todo)
+
     return this._toToDo(todo);
   }
 
@@ -70,27 +69,41 @@ export class TodoService {
 
 
   async getPublicTodo(publicLink: string): Promise<Todo> {
-    const publicTodo: PublicTodoEntity = await this.publicTodo.findOne({ publicLink});
+    const publicTodo: PublicTodoEntity = await this.publicTodo.findOne({
+      where: { publicLink },
+      relations: ['todo']
+    });
     if (!publicTodo) throw new NotFoundException();
+
     return this.getTodoById(publicTodo.todo.id);
   }
 
   async getTodoPublicLink(id: string): Promise<PublicTodo> {
     const todo: TodoEntity = await this._findTodoById(id);
 
-    const publicTodo = await this.hasPublicTodo(todo);
-    if (publicTodo) {
-      return publicTodo;
+    const hasPublicTodo = await this.hasPublicTodo(todo);
+    if (hasPublicTodo) {
+      return hasPublicTodo;
     }
 
-    const publicTodoEntity = this.publicTodo.create({ todo });
-    return this._toPublicTodo(publicTodoEntity);
+    const publicTodoEntity: PublicTodoEntity = this.publicTodo.create({
+      todo
+    });
+
+    const publicTodo = await this.publicTodo.save(publicTodoEntity);
+    return this._toPublicTodo(publicTodo);
   }
 
   private async hasPublicTodo(todo: TodoEntity): Promise<PublicTodo> {
-    const publicTodo = await this.publicTodo.findOne({todo});
-    if (!publicTodo) return null;
-    return this._toPublicTodo(publicTodo);
+    try {
+      const publicTodo = await this.publicTodo.findOne({
+        where: { todo },
+        relations: ['todo']
+      });
+      return this._toPublicTodo(publicTodo);
+    } catch (err) {
+      return null;
+    }
   }
 
   private _toToDo(todo: TodoEntity): Todo {
