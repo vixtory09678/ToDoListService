@@ -9,6 +9,8 @@ import { UploadFile } from './interfaces/upload_file.interfaces';
 import { User } from 'src/auth/decorators/user.decorator';
 import { UserEntity } from 'src/users/entities/users.entity';
 import { Todo } from './interfaces/todo.interface';
+import { UpdateTodoDto } from './dto/update_todo.dto';
+import { PublicTodo } from './interfaces/public_todo.interface';
 
 @Controller('todo')
 export class TodoController {
@@ -50,9 +52,9 @@ export class TodoController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put('/')
-  async updateTodo() {
-
+  @Put('/:id')
+  async updateTodo(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoDto): Promise<Todo> {
+    return this.todoService.updateTodo(id, updateTodoDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -61,14 +63,14 @@ export class TodoController {
     return await this.todoService.deleteTodo(id);
   }
 
-  @Get('/public/:id')
-  async getPublicTodo() {
-
+  @Get('/public/:publicLink')
+  async getPublicTodo(@Param('publicLink') publicLink: string): Promise<Todo> {
+    return await this.todoService.getPublicTodo(publicLink);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/public')
-  async getTodoPublicLink() {
-
+  async getTodoPublicLink(@Param('id') id: string): Promise<PublicTodo> {
+    return await this.todoService.getTodoPublicLink(id);
   }
 }

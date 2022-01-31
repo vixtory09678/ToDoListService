@@ -3,14 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/users/entities/users.entity';
 import { Repository } from 'typeorm';
 import { CreateTodoDto } from './dto/create_todo.dto';
+import { UpdateTodoDto } from './dto/update_todo.dto';
+import { PublicTodoEntity } from './entities/public_todo.entity';
 import { TodoEntity } from './entities/todo.entity';
+import { PublicTodo } from './interfaces/public_todo.interface';
 import { Todo } from './interfaces/todo.interface';
 
 @Injectable()
 export class TodoService {
 
   constructor(
-    @InjectRepository(TodoEntity) private readonly todoRepo: Repository<TodoEntity>
+    @InjectRepository(TodoEntity) private readonly todoRepo: Repository<TodoEntity>,
+    @InjectRepository(PublicTodoEntity) private readonly publicTodo: Repository<PublicTodoEntity>
   ) {}
 
   async addTodo (user: UserEntity, createTodoDto: CreateTodoDto) {
@@ -25,65 +29,68 @@ export class TodoService {
       name: createTodoDto.name,
       detail: createTodoDto.detail,
       pictureUrl
-    })
+    });
+
     return this.todoRepo.save(todoEntity);
   }
 
   async getTodo(user: UserEntity): Promise<Todo[]> {
-    const todoEntities = await this.todoRepo.find({
-      select: ['id', 'name', 'detail', 'pictureUrl', 'isDone', 'createdAt'],
-      where: { user } 
-    })
+    const todoEntities = await this.todoRepo.find({ user });
 
-    if(!todoEntities) {
-      throw new BadRequestException('Todo is not exist');
-    }
+    if(!todoEntities) throw new BadRequestException('Todo is not exist');
 
     let todoList: Todo[] = [];
-
     todoEntities.forEach(entity => {
       todoList.push(this._toToDo(entity));
-    })
+    });
+
     return todoList;
   }
 
   async getTodoById(id: string): Promise<Todo> {
-    const todoEntity = await this.todoRepo.findOne({
-      select: ['id', 'name', 'detail', 'pictureUrl', 'isDone', 'createdAt'],
-      where: { id } 
-    })
-
-    if (!todoEntity) {
-      throw new BadRequestException('Todo is not exist');
-    }
-    return this._toToDo(todoEntity);
+    const todo: TodoEntity = await this._findTodoById(id);
+    return this._toToDo(todo);
   }
 
-  async updateTodo() {
-    // TODO will add later
+  async updateTodo(id: string, updateTodo: UpdateTodoDto): Promise<Todo> {
+    let todo: TodoEntity = await this._findTodoById(id);
+    todo = this.todoRepo.create({
+      id,
+      ...updateTodo
+    })
+    await this.todoRepo.update({id}, todo)
+    return this._toToDo(todo);
   }
 
   async deleteTodo(id: string) {
-    const todo: TodoEntity = await this.todoRepo.findOne({
-      where: { id },
-      relations: ['user'],
-    });
-
-    if (!todo) {
-      throw new BadRequestException('Todo is not exist')
-    }
-
-    await this.todoRepo.delete({ id })
+    const todo: TodoEntity = await this._findTodoById(id);
+    await this.todoRepo.delete({ id });
     return this._toToDo(todo);
   }
 
 
-  async getPublicTodo() {
-    // TODO will add later
+  async getPublicTodo(publicLink: string): Promise<Todo> {
+    const publicTodo: PublicTodoEntity = await this.publicTodo.findOne({ publicLink});
+    if (!publicTodo) throw new NotFoundException();
+    return this.getTodoById(publicTodo.todo.id);
   }
 
-  async getTodoPublicLink() {
-    // TODO will add later
+  async getTodoPublicLink(id: string): Promise<PublicTodo> {
+    const todo: TodoEntity = await this._findTodoById(id);
+
+    const publicTodo = await this.hasPublicTodo(todo);
+    if (publicTodo) {
+      return publicTodo;
+    }
+
+    const publicTodoEntity = this.publicTodo.create({ todo });
+    return this._toPublicTodo(publicTodoEntity);
+  }
+
+  private async hasPublicTodo(todo: TodoEntity): Promise<PublicTodo> {
+    const publicTodo = await this.publicTodo.findOne({todo});
+    if (!publicTodo) return null;
+    return this._toPublicTodo(publicTodo);
   }
 
   private _toToDo(todo: TodoEntity): Todo {
@@ -94,6 +101,20 @@ export class TodoService {
       pictureUrl: todo.pictureUrl,
       isDone: todo.isDone,
       createdAt: todo.createdAt
-    }
+    };
+  }
+
+  private async _findTodoById(id: string): Promise<TodoEntity> {
+    const todoEntity = await this.todoRepo.findOne({ id })
+    if (!todoEntity) throw new BadRequestException('Todo is not exist');
+    return todoEntity;
+  }
+
+  private _toPublicTodo(publicTodo: PublicTodoEntity): PublicTodo {
+    return {
+      id: publicTodo.id,
+      publicLink: publicTodo.publicLink,
+      createdAt: publicTodo.createdAt
+    };
   }
 }
