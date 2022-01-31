@@ -8,6 +8,7 @@ import { diskStorage } from 'multer'
 import { UploadFile } from './interfaces/upload_file.interfaces';
 import { User } from 'src/auth/decorators/user.decorator';
 import { UserEntity } from 'src/users/entities/users.entity';
+import { Todo } from './interfaces/todo.interface';
 
 @Controller('todo')
 export class TodoController {
@@ -33,14 +34,13 @@ export class TodoController {
   @UseGuards(JwtAuthGuard)
   @Post('/')
   async addTodo(@Body() createTodoDto: CreateTodoDto, @User() user: UserEntity) {
-    console.log(user);
-    this.todoService.addTodo(user, createTodoDto);
+    await this.todoService.addTodo(user, createTodoDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('/')
-  async getTodo() {
-    return 'get todo'
+  async getTodo(@User() user: UserEntity): Promise<Todo[]> {
+    return await this.todoService.getTodo(user);
   }
 
   @UseGuards(JwtAuthGuard)
