@@ -2,10 +2,12 @@ import { IsString, IsNotEmpty, IsOptional, IsBoolean } from "class-validator";
 
 export class UpdateTodoDto {
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @IsOptional()
   @IsString()
   detail: string;
 
