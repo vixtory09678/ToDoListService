@@ -4,10 +4,11 @@ import { TodoController } from './todo.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { TodoEntity } from './entities/todo.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PublicTodoEntity } from './entities/public_todo.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ TodoEntity ]),
+    TypeOrmModule.forFeature([ TodoEntity, PublicTodoEntity ]),
     MulterModule.register({
       dest: '/uploads',
     })
