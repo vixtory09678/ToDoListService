@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { TodoEntity } from './todo.entity';
 
 @Entity()
@@ -12,7 +12,8 @@ export class PublicTodoEntity {
   })
   publicLink: string
 
-  @OneToOne(type => TodoEntity)
+  @OneToOne(() => TodoEntity)
+  @JoinColumn()
   todo: TodoEntity;
 
   @CreateDateColumn()
