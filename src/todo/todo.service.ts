@@ -31,7 +31,7 @@ export class TodoService {
       throw new NotFoundException('Data not found');
     }
 
-    let todoList: Todo[];
+    let todoList: Todo[] = [];
 
     todoEntity.forEach(todo => {
       todoList.push({
