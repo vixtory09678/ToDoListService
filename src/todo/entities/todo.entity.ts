@@ -18,6 +18,7 @@ export class TodoEntity {
   @Column({
     type: 'varchar', 
     nullable: true, 
+    default: ''
   })
   detail: string;
 
