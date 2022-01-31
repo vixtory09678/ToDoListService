@@ -6,12 +6,13 @@ export class CreateTodoDto {
   @IsNotEmpty()
   name: string;
 
+  @IsOptional()
   @IsString()
   detail: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  picture_url: string;
+  pictureUrl: string;
 
 }
