@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Post, Put, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { editFileName, handleDestination, imageFileFilter } from 'src/utils/file_uploading.utils';
@@ -45,8 +45,8 @@ export class TodoController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/:id')
-  async getTodoById() {
-
+  async getTodoById(@Param('id') id: string): Promise<Todo> {
+    return await this.todoService.getTodoById(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -57,8 +57,8 @@ export class TodoController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('/:id')
-  async deleteTodo() {
-
+  async deleteTodo(@Param('id') id: string): Promise<Todo> {
+    return await this.todoService.deleteTodo(id);
   }
 
   @Get('/public/:id')
