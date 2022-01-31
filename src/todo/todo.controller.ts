@@ -69,7 +69,7 @@ export class TodoController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/public')
+  @Post('/public/:id')
   async getTodoPublicLink(@Param('id') id: string): Promise<PublicTodo> {
     return await this.todoService.getTodoPublicLink(id);
   }
