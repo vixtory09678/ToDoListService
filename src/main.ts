@@ -1,4 +1,5 @@
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import * as express from 'express';
 import { AppModule } from './app.module';
@@ -8,6 +9,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.use('/images', express.static(`${__dirname}/uploads`))
-  await app.listen(3000);
+
+  const config = app.get(ConfigService);
+  const port = config.get<number>('APP_PORT', 3000);
+  await app.listen(port);
 }
 bootstrap();
