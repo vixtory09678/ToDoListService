@@ -37,11 +37,13 @@ export class AuthService {
   }
 
   async validateUser(username: string): Promise<UserDto> {
-    const user =  await this.userService.findByUserName(username);
-    if (!user) {
-      throw new UnauthorizedException('Invalid token');
+    try {
+      const user =  await this.userService.findByUserName(username);
+      if (!user) throw new UnauthorizedException('Invalid token');
+      return user;
+    } catch (err) {
+      throw new UnauthorizedException();
     }
-    return user;
   }
 
   private async createToken({username} : UserDto): Promise<CreateToken> {
