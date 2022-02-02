@@ -27,7 +27,7 @@ export class TodoEntity {
     nullable: false, 
     default: ''
   })
-  pictureUrl: string;
+  picturePath: string;
 
   @Column({
     type: 'bool', 

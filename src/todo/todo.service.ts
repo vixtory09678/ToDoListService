@@ -18,17 +18,17 @@ export class TodoService {
   ) {}
 
   async addTodo (user: UserEntity, createTodoDto: CreateTodoDto) {
-    let pictureUrl = ''
+    let picturePath = ''
     
     if (createTodoDto.pictureName)
       // TODO use static url; edit later
-      pictureUrl = 'todo-service/images/' + createTodoDto.pictureName;
+      picturePath = '/images/' + createTodoDto.pictureName;
 
     const todoEntity:TodoEntity = this.todoRepo.create({
       user,
       name: createTodoDto.name,
       detail: createTodoDto.detail,
-      pictureUrl
+      picturePath
     });
 
     return this.todoRepo.save(todoEntity);
@@ -111,7 +111,7 @@ export class TodoService {
       id: todo.id,
       name: todo.name,
       detail: todo.detail,
-      pictureUrl: todo.pictureUrl,
+      picturePath: todo.picturePath,
       isDone: todo.isDone,
       createdAt: todo.createdAt
     };
