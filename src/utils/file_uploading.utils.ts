@@ -1,6 +1,8 @@
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, unlinkSync } from "fs";
 import { extname } from "path";
 import { v4 as uuid } from "uuid";
+
+const imagesPath = `${__dirname}/../uploads`;
 
 export const editFileName = (req, file: Express.Multer.File, callback) => {
   const fileExtName = extname(file.originalname);
@@ -15,10 +17,18 @@ export const imageFileFilter = (req, file, callback) => {
 };
 
 export const handleDestination = (req, file, cb) => {
-  const uploadPath = `${__dirname}/../uploads`;
   // Create folder if doesn't exist
-  if (!existsSync(uploadPath)) {
-      mkdirSync(uploadPath);
+  if (!existsSync(imagesPath)) {
+      mkdirSync(imagesPath);
   }
-  cb(null, uploadPath);
+  cb(null, imagesPath);
+}
+
+export const deleteFile = (path: string) :Boolean =>{
+  try {
+    unlinkSync(imagesPath + path);
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
