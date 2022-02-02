@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/users/entities/users.entity';
-import { Repository } from 'typeorm';
+import { deleteFile } from 'src/utils/file_uploading.utils';
+import { Connection, Repository } from 'typeorm';
 import { CreateTodoDto } from './dto/create_todo.dto';
 import { UpdateTodoDto } from './dto/update_todo.dto';
 import { PublicTodoEntity } from './entities/public_todo.entity';
@@ -14,15 +15,15 @@ export class TodoService {
 
   constructor(
     @InjectRepository(TodoEntity) private readonly todoRepo: Repository<TodoEntity>,
-    @InjectRepository(PublicTodoEntity) private readonly publicTodo: Repository<PublicTodoEntity>
+    @InjectRepository(PublicTodoEntity) private readonly publicTodo: Repository<PublicTodoEntity>,
+    private connection: Connection
   ) {}
 
   async addTodo (user: UserEntity, createTodoDto: CreateTodoDto) {
     let picturePath = ''
     
     if (createTodoDto.pictureName)
-      // TODO use static url; edit later
-      picturePath = '/images/' + createTodoDto.pictureName;
+      picturePath = '/' + createTodoDto.pictureName;
 
     const todoEntity:TodoEntity = this.todoRepo.create({
       user,
@@ -53,9 +54,14 @@ export class TodoService {
   }
 
   async updateTodo(id: string, updateTodo: UpdateTodoDto): Promise<Todo> {
+    let picturePath = ''
+    
+    if (updateTodo.pictureName)
+      picturePath = '/' + updateTodo.pictureName;
+
     let todo: TodoEntity = await this._findTodoById(id);
 
-    todo = this.todoRepo.create({ id,...updateTodo })
+    todo = this.todoRepo.create({ id,...updateTodo, picturePath })
     await this.todoRepo.update({id}, todo)
 
     return this._toToDo(todo);
@@ -63,8 +69,25 @@ export class TodoService {
 
   async deleteTodo(id: string) {
     const todo: TodoEntity = await this._findTodoById(id);
-    await this.todoRepo.delete({ id });
-    return this._toToDo(todo);
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    
+    try {
+      await this.todoRepo.delete({ id });
+
+      if (!deleteFile(todo.picturePath))
+        throw new InternalServerErrorException('Server is can\'t delete file');
+
+      await queryRunner.commitTransaction();
+      return this._toToDo(todo);
+      
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
 
