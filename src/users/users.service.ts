@@ -29,10 +29,13 @@ export class UsersService {
   }
 
   async loginUser(username: string): Promise<UserEntity> {
-    const user = await this.userRepo.findOne({where: {username}});
-    if (!user) throw new UnauthorizedException('User not found.');
-
-    return user;
+    try {
+      const user = await this.userRepo.findOne({where: {username}});
+      if (!user) throw new UnauthorizedException('User not found.');
+      return user;
+    } catch (err) {
+      throw new BadRequestException('Request is invalid.');
+    }
   }
 
   async findByUserName(userName: string): Promise<UserDto> {
