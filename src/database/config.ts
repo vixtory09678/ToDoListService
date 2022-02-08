@@ -12,7 +12,7 @@ const databaseProviders = (configService: ConfigService) => {
     database: configService.get<string>('DB_NAME', 'db_name'),
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
     namingStrategy: new SnakeNamingStrategy(),
-    synchronize: configService.get<string>('NODE_ENV') === 'prod',
+    synchronize: true,
   }
   return config;
 }
