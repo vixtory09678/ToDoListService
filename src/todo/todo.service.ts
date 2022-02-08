@@ -36,7 +36,14 @@ export class TodoService {
   }
 
   async getTodo(user: UserEntity): Promise<Todo[]> {
-    const todoEntities = await this.todoRepo.find({ user });
+    const todoEntities = await this.todoRepo.find({ 
+      where: {
+        user
+      },
+      order: {
+        createdAt: 'DESC'
+      }
+    });
 
     if(!todoEntities) throw new BadRequestException('Todo is not exist');
 
@@ -55,7 +62,6 @@ export class TodoService {
 
   async updateTodo(id: string, updateTodo: UpdateTodoDto): Promise<Todo> {
     let picturePath = ''
-    
     if (updateTodo.pictureName)
       picturePath = '/' + updateTodo.pictureName;
 
@@ -109,9 +115,7 @@ export class TodoService {
       return hasPublicTodo;
     }
 
-    const publicTodoEntity: PublicTodoEntity = this.publicTodo.create({
-      todo
-    });
+    const publicTodoEntity: PublicTodoEntity = this.publicTodo.create({ todo });
 
     const publicTodo = await this.publicTodo.save(publicTodoEntity);
     return this._toPublicTodo(publicTodo);
