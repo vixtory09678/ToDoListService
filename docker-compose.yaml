@@ -1,0 +1,58 @@
+version: "3"
+networks:
+  todo_networks:
+    driver: bridge
+
+services:
+  app:
+    build:
+      context: .
+    container_name: todo-service
+    image: todo-service
+    volumes:
+      - "./src:/usr/src/app/src"
+    ports:
+      - 3000:3000
+    environment:
+      APP_PORT: 3000
+      NODE_ENV: "development"
+
+      JWT_KEY: "this_my_key"
+      JWT_EXPIRES_IN: "1h"
+
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: todo_admin
+      DB_PASSWORD: admin1234
+      DB_NAME: todo_list_db
+    networks:
+      - todo_networks
+    depends_on: 
+      - postgres
+
+  postgres:
+    image: postgres
+    container_name: db_todo
+    restart: always
+    ports:
+      - 8090:5432
+    environment:
+      POSTGRES_USER: todo_admin
+      POSTGRES_PASSWORD: admin1234
+      POSTGRES_DB: todo_list_db
+    networks:
+      - todo_networks
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+
+  adminer:
+    image: adminer
+    container_name: db_admin_todo
+    restart: always
+    ports:
+      - 9000:8080
+    networks:
+      - todo_networks
+  
+volumes:
+  database-data:
