@@ -12,7 +12,7 @@ export class PublicTodoEntity {
   })
   publicLink: string
 
-  @OneToOne(() => TodoEntity)
+  @OneToOne(() => TodoEntity, { cascade: ["insert", "update", "remove", "soft-remove", "recover"], onDelete: "CASCADE" })
   @JoinColumn()
   todo: TodoEntity;
 
