@@ -12,7 +12,6 @@ export class CreateTodoDto {
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   pictureName: string;
 
 }
