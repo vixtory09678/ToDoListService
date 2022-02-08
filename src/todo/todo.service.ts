@@ -19,6 +19,12 @@ export class TodoService {
     private connection: Connection
   ) {}
 
+  /**
+   * It creates a new todo entity and saves it to the database.
+   * @param {UserEntity} user - UserEntity
+   * @param {CreateTodoDto} createTodoDto - CreateTodoDto
+   * @returns Nothing.
+   */
   async addTodo (user: UserEntity, createTodoDto: CreateTodoDto) {
     let picturePath = ''
     
@@ -35,6 +41,11 @@ export class TodoService {
     return this.todoRepo.save(todoEntity);
   }
 
+  /**
+   * Get all todo of a user
+   * @param {UserEntity} user - UserEntity
+   * @returns An array of Todo objects.
+   */
   async getTodo(user: UserEntity): Promise<Todo[]> {
     const todoEntities = await this.todoRepo.find({ 
       where: {
@@ -55,11 +66,22 @@ export class TodoService {
     return todoList;
   }
 
+  /**
+   * It returns a Todo object from a TodoEntity object.
+   * @param {string} id - The id of the todo to be retrieved.
+   * @returns A Todo object
+   */
   async getTodoById(id: string): Promise<Todo> {
     const todo: TodoEntity = await this._findTodoById(id);
     return this._toToDo(todo);
   }
 
+  /**
+   * Update a todo
+   * @param {string} id - string
+   * @param {UpdateTodoDto} updateTodo - UpdateTodoDto
+   * @returns The updated todo
+   */
   async updateTodo(id: string, updateTodo: UpdateTodoDto): Promise<Todo> {
     let picturePath = ''
     if (updateTodo.pictureName)
@@ -73,6 +95,11 @@ export class TodoService {
     return this._toToDo(todo);
   }
 
+  /**
+   * It deletes a todo from the database.
+   * @param {string} id - The id of the todo to be deleted.
+   * @returns Nothing.
+   */
   async deleteTodo(id: string) {
     const todo: TodoEntity = await this._findTodoById(id);
     const queryRunner = this.connection.createQueryRunner();
@@ -97,6 +124,11 @@ export class TodoService {
   }
 
 
+  /**
+   * Get a public todo by its public link.
+   * @param {string} publicLink - string
+   * @returns A Todo object.
+   */
   async getPublicTodo(publicLink: string): Promise<Todo> {
     const publicTodo: PublicTodoEntity = await this.publicTodo.findOne({
       where: { publicLink },
@@ -107,6 +139,13 @@ export class TodoService {
     return this.getTodoById(publicTodo.todo.id);
   }
 
+  /**
+   * "Get a public link to a todo."
+   * 
+   * The function is asynchronous because it uses the `await` keyword
+   * @param {string} id - The id of the todo to get the public link for.
+   * @returns A public todo
+   */
   async getTodoPublicLink(id: string): Promise<PublicTodo> {
     const todo: TodoEntity = await this._findTodoById(id);
 
@@ -121,6 +160,13 @@ export class TodoService {
     return this._toPublicTodo(publicTodo);
   }
 
+  /**
+   * "Given a todo, return the public todo if it exists, otherwise return null."
+   * 
+   * The function is asynchronous because it uses the `findOne` method of the `PublicTodoRepository`
+   * @param {TodoEntity} todo - The todo entity to check for.
+   * @returns A promise of a PublicTodo.
+   */
   private async hasPublicTodo(todo: TodoEntity): Promise<PublicTodo> {
     try {
       const publicTodo = await this.publicTodo.findOne({
@@ -133,6 +179,11 @@ export class TodoService {
     }
   }
 
+  /**
+   * Convert a TodoEntity to a Todo
+   * @param {TodoEntity} todo - TodoEntity
+   * @returns An object with the same properties as the TodoEntity.
+   */
   private _toToDo(todo: TodoEntity): Todo {
     return {
       id: todo.id,
@@ -144,12 +195,23 @@ export class TodoService {
     };
   }
 
+  /**
+   * Find a TodoEntity by its id
+   * @param {string} id - The id of the todo to be deleted.
+   * @returns TodoEntity.
+   */
   private async _findTodoById(id: string): Promise<TodoEntity> {
     const todoEntity = await this.todoRepo.findOne({ id })
     if (!todoEntity) throw new BadRequestException('Todo is not exist');
     return todoEntity;
   }
 
+  /**
+   * It converts a public todo entity to a public todo.
+   * @param {PublicTodoEntity} publicTodo - The publicTodo entity that we want to convert to a
+   * publicTodo.
+   * @returns A public todo object.
+   */
   private _toPublicTodo(publicTodo: PublicTodoEntity): PublicTodo {
     return {
       id: publicTodo.id,

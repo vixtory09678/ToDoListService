@@ -15,11 +15,21 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
+  /**
+   * Create a user
+   * @param {CreateUserDto} createUserDto - CreateUserDto
+   * @returns A user object.
+   */
   async signup(createUserDto: CreateUserDto): Promise<UserDto> {
     const user = await this.userService.createUser(createUserDto);
     return user;
   }
 
+  /**
+   * It takes in a LoginUserDto and returns a LoginResponse.
+   * @param {LoginUserDto} loginUserDto - LoginUserDto
+   * @returns A token
+   */
   async login(loginUserDto: LoginUserDto): Promise<LoginResponse> {
     const user = await this.userService.loginUser(loginUserDto.username);
 
@@ -36,6 +46,11 @@ export class AuthService {
     return response
   }
 
+  /**
+   * It validates the user by checking if the user exists in the database.
+   * @param {string} username - string
+   * @returns a UserDto.
+   */
   async validateUser(username: string): Promise<UserDto> {
     try {
       const user =  await this.userService.findByUserName(username);
@@ -46,6 +61,11 @@ export class AuthService {
     }
   }
 
+  /**
+   * Create a token for the user
+   * @param {UserDto}  - username - The username of the user who is requesting a token.
+   * @returns An object with two properties: accessToken and expiredIn.
+   */
   private async createToken({username} : UserDto): Promise<CreateToken> {
     const expiredIn = process.env.JWT_EXPIRES_IN;
     const user = { username };
